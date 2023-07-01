@@ -1,4 +1,29 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
+const getAllData = async () => {
+    try {
+        const keys = await AsyncStorage.getAllKeys();
+        const result = await AsyncStorage.multiGet(keys);
+        return result.map(([key, value]) => ({ key, value: JSON.parse(value) }));
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+export const sendDataToServer = async () => {
+    try {
+        // const response = await axios.post('http://your-server-ip:5000/saveData', data);
+        const data = await getAllData();
+        const response = await axios.post('http://192.168.1.141:5000/saveData', data);
+        console.log(response.data);
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
 
 export const saveExpense = async (inputName, inputAmount, setInputName, setInputAmount) => {
     try {

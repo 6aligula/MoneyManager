@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, View, SafeAreaView, TextInput, Text, ScrollView, FlatList } from 'react-native';
-import { saveExpense, saveIncome, mostrarTodo, deleteExpense, deleteIncome } from './functions/functionsHome';
+import { saveExpense, saveIncome, sendDataToServer, deleteExpense, deleteIncome } from './functions/functionsHome';
 import styles from './styles/HomeScreen';
 import Toast from 'react-native-toast-message';
 
@@ -198,8 +198,19 @@ const HomeScreen = ({ navigation }) => {
                             }}
                         />
                     </View>
-
                 </View>
+                {/* enviar datos al servidor */}
+                <View style={styles.buttonContainer}>
+                    <View style={styles.roundedButton}>
+                        <Button
+                            title="Enviar datos"
+                            onPress={() => {
+                                sendDataToServer();
+                            }}
+                        />
+                    </View>
+                </View>
+
             </ScrollView>
 
         </SafeAreaView>

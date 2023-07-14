@@ -1,7 +1,9 @@
 import { StyleSheet } from "react-native";
+import { ReloadInstructions } from "react-native/Libraries/NewAppScreen";
 const styles = StyleSheet.create({
     safeAreaContainer: {
         flex: 1,
+        backgroundColor: 'blue',
     },
     container: {
         paddingHorizontal: 16,

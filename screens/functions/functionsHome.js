@@ -1,29 +1,75 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { API_URL } from '@env';
 
 const getAllData = async () => {
     try {
-        const keys = await AsyncStorage.getAllKeys();
+        // Claves que nos interesan: 'expenses' y 'incomes'
+        const keys = ['expenses', 'incomes'];
         const result = await AsyncStorage.multiGet(keys);
-        return result.map(([key, value]) => ({ key, value: JSON.parse(value) }));
+
+        // Obtener mes y año del mes anterior
+        let currentDate = new Date();
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        const previousMonth = currentDate.getMonth();
+        const previousYear = currentDate.getFullYear();
+
+        let expenses = [];
+        let incomes = [];
+
+        result.forEach(([key, value]) => {
+            if (value) {
+                try {
+                    let parsedValue = JSON.parse(value);
+
+                    // Filtrar elementos según el mes y año
+                    let filteredItems = parsedValue.filter(item => {
+                        if (!item.id) return false;
+                        const itemDate = new Date(item.id);
+                        return (
+                            itemDate.getMonth() === previousMonth &&
+                            itemDate.getFullYear() === previousYear
+                        );
+                    });
+
+                    // Asignar según la clave
+                    if (key === 'expenses') {
+                        expenses = filteredItems;
+                    } else if (key === 'incomes') {
+                        incomes = filteredItems;
+                    }
+                } catch (error) {
+                    console.error(`Error al parsear ${key}:`, error);
+                }
+            }
+        });
+
+        return { expenses, incomes };
     } catch (error) {
-        console.error(error);
+        console.error("Error obteniendo datos:", error);
+        return { expenses: [], incomes: [] };
     }
 };
 
 export const sendDataToServer = async () => {
     try {
-        // const response = await axios.post('http://your-server-ip:5000/saveData', data);
         const data = await getAllData();
-        const response = await axios.post('http://192.168.1.141:5000/saveData', data);
+        if (data.expenses.length === 0 && data.incomes.length === 0) {
+            console.log("No hay datos para enviar este mes.");
+            return false;
+        }
+        
+        const response = await axios.post(`${API_URL}/saveData`, data);
         console.log(response.data);
+        // Una vez enviada la data, se limpian los registros para iniciar el nuevo mes.
+        await AsyncStorage.removeItem('expenses');
+        await AsyncStorage.removeItem('incomes');
         return true;
     } catch (error) {
         console.error(error);
         return false;
     }
-}
-
+};
 
 export const saveExpense = async (inputName, inputAmount, setInputName, setInputAmount) => {
     try {

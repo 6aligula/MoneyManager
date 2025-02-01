@@ -78,3 +78,4 @@ yarn-error.log
 android/local.properties
 ios/Podfile.lock
 ios/Pods/Manifest.lock
+.env
